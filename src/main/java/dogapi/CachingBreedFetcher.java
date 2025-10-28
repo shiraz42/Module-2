@@ -5,27 +5,34 @@ import java.util.*;
 public class CachingBreedFetcher implements BreedFetcher {
 
     private final BreedFetcher fetcher;
-    private final Map<String, List<String>> cache;
+    private final Map<String, List<String>> cache = new HashMap<>();
     private int callsMade = 0;
 
     public CachingBreedFetcher(BreedFetcher fetcher) {
         this.fetcher = fetcher;
-        this.cache = new HashMap<>();
     }
 
     @Override
     public List<String> getSubBreeds(String breed) throws BreedNotFoundException {
+        // If we already have it cached, return it directly.
         if (cache.containsKey(breed)) {
             return cache.get(breed);
         }
 
         try {
-            List<String> result = fetcher.getSubBreeds(breed);
+            // ✅ Record that we are making a call to the underlying fetcher.
             callsMade++;
-            cache.put(breed, result);
-            return result;
+
+            // Call the underlying fetcher
+            List<String> subBreeds = fetcher.getSubBreeds(breed);
+
+            // Cache the successful result
+            cache.put(breed, subBreeds);
+
+            return subBreeds;
+
         } catch (BreedNotFoundException e) {
-            // don't cache failed results, just rethrow
+            // ✅ Still counts as a call, but do NOT cache failures.
             throw e;
         }
     }
@@ -34,3 +41,4 @@ public class CachingBreedFetcher implements BreedFetcher {
         return callsMade;
     }
 }
+
