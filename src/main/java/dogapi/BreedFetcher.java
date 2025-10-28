@@ -15,7 +15,7 @@ public interface BreedFetcher {
      */
     List<String> getSubBreeds(String breed) throws BreedNotFoundException;
 
-    // ✅ Now a checked exception
+    // ✅ Make this checked (extends Exception)
     class BreedNotFoundException extends Exception {
         public BreedNotFoundException(String breed) {
             super("Breed not found: " + breed);
